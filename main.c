@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 
 #include "graphics.h"
 #include "universe.h"
@@ -8,15 +9,18 @@ main(void)
 {
 	SDL_Event event;
 	struct graphics* graphics;
-	struct universe* universe = genuniverse(40, 40);
+	const int cols = 180, rows = 180;
+	struct universe* universe = genuniverse(cols, rows);
 	struct universe* nextuniverse;
 	int quit = 0, lasttime = 0, currenttime = 0;
 
 	graphics = initgphs(universe);
 
-	universe->space[19][20] = 1;
-	universe->space[20][20] = 1;
-	universe->space[21][20] = 1;
+	srand(time(NULL));
+	for (int i = 0; i < cols; ++i) {
+		for (int j = 0; j < rows; j++)
+			universe->space[i][j] = rand() & 0xff % 2;
+	}
 	lasttime = SDL_GetTicks();
 	while (!quit)
 	{
@@ -24,7 +28,7 @@ main(void)
 			if (event.type == SDL_QUIT)
 				quit = 1;
 		}
-		if (SDL_GetTicks() - lasttime >= 150) {
+		if (SDL_GetTicks() - lasttime >= 100) {
 			drawgluniverse(graphics->glwindow, graphics->gluniverse, universe);
 			nextuniverse = nextgen(universe);
 			deluniverse(universe);
