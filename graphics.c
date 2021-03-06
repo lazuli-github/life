@@ -141,14 +141,17 @@ drawgluniverse(struct glwindow* glwindow, struct gluniverse* gluniverse, struct 
 {
 	int i, x, y;
 	int colorlocation;
+	float r, g, b;
 
 	glUseProgram(gluniverse->program);
 	colorlocation = glGetUniformLocation(gluniverse->program, "color");
 	for (i = 0, x = 0, y = 0; i < gluniverse->numvao; ++i) {
-		if (universe->space[x][y])
-			glUniform4f(colorlocation, 1.0f, 1.0f, 1.0f, 1.0f);
-		else
-			glUniform4f(colorlocation, 0.0f, 0.0f, 0.0f, 0.0f);
+		/* If the cell is alive, all the colors rgb will be set to 1
+		 * so alive cells are white and dead cells are black. */
+		r = universe->space[x][y];
+		g = universe->space[x][y];
+		b = universe->space[x][y];
+		glUniform4f(colorlocation, r, g, b, 0.0f);
 		glBindVertexArray(gluniverse->vao[i]);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
@@ -255,9 +258,9 @@ newgluniverse(struct glwindow* glwindow, struct universe* universe)
 		glGenBuffers(1, &gluniverse->ebo[squarec]);
 		glBindVertexArray(gluniverse->vao[squarec]);
 		glBindBuffer(GL_ARRAY_BUFFER, gluniverse->vbo[squarec]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gluniverse->ebo[squarec]);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0);
 		glEnableVertexAttribArray(0);
