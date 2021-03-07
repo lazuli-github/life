@@ -9,7 +9,7 @@ main(void)
 {
 	SDL_Event event;
 	struct graphics* graphics;
-	const int cols = 180, rows = 180;
+	const int cols = 50, rows = 49;
 	struct universe* universe = genuniverse(cols, rows);
 	struct universe* nextuniverse;
 	int quit = 0, lasttime = 0, currenttime = 0;
