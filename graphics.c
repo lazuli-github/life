@@ -170,14 +170,9 @@ delgluniverse(struct gluniverse* gluniverse)
 {
 	size_t i;
 
-	for (i = 0; i < gluniverse->numvbo; ++i) {
+	for (i = 0; i < gluniverse->numvao; ++i)
 		glDeleteVertexArrays(1, &gluniverse->vao[i]);
-		glDeleteBuffers(1, &gluniverse->vbo[i]);
-		glDeleteBuffers(1, &gluniverse->ebo[i]);
-	}
 	glDeleteProgram(gluniverse->program);
-	free(gluniverse->vbo);
-	free(gluniverse->ebo);
 	free(gluniverse->vao);
 	free(gluniverse);
 }
@@ -207,6 +202,7 @@ struct gluniverse*
 newgluniverse(struct glwindow* glwindow, struct universe* universe)
 {
 	int x, y, squarec;
+	unsigned vbo, ebo;
 	struct gluniverse* gluniverse = malloc(sizeof(struct gluniverse));
 	float sqwidth, sqheight, square[12];
 	const unsigned indices[] = {
@@ -219,18 +215,19 @@ newgluniverse(struct glwindow* glwindow, struct universe* universe)
 		exit(1);
 	}
 	gluniverse->program = genshaderprog();
-	gluniverse->numvbo = universe->cols * universe->rows;
-	gluniverse->vbo = malloc(gluniverse->numvbo * sizeof(unsigned));
-	gluniverse->numebo = gluniverse->numvbo;
-	gluniverse->ebo = malloc(gluniverse->numebo * sizeof(unsigned));
-	gluniverse->numvao = gluniverse->numvbo;
+	gluniverse->numvao = universe->cols * universe->rows;
 	gluniverse->vao = malloc(gluniverse->numvao * sizeof(unsigned));
-	if (!gluniverse->vbo || !gluniverse->ebo || !gluniverse->vao) {
+	if (!gluniverse->vao) {
 		fprintf(stderr, "error: could not allocate memory.\n");
 		exit(1);
 	}
 	sqwidth = (float) glwindow->width / (float) universe->cols;
 	sqheight = (float) glwindow->height / (float) universe->rows;
+
+	glViewport(0, 0, glwindow->width, glwindow->height);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glGenVertexArrays(gluniverse->numvao, &gluniverse->vao[squarec]);
 	for (x = 0, y = 0, squarec = 0; squarec < universe->cols * universe->rows; ++squarec) {
 		/* Top left */
 		square[0] = normxcoord(glwindow, (float) x * sqwidth);
@@ -249,23 +246,22 @@ newgluniverse(struct glwindow* glwindow, struct universe* universe)
 		square[10] = normycoord(glwindow, (float) y * sqheight + sqwidth);
 		square[11] = 0.0f;
 
-		glViewport(0, 0, glwindow->width, glwindow->height);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		glGenVertexArrays(1, &gluniverse->vao[squarec]);
-		glGenBuffers(1, &gluniverse->vbo[squarec]);
-		glGenBuffers(1, &gluniverse->ebo[squarec]);
+		glGenBuffers(1, &vbo);
+		glGenBuffers(1, &ebo);
 		glBindVertexArray(gluniverse->vao[squarec]);
-		glBindBuffer(GL_ARRAY_BUFFER, gluniverse->vbo[squarec]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gluniverse->ebo[squarec]);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
+		glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0);
+
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glDeleteBuffers(1, &vbo);
+		glDeleteBuffers(1, &ebo);
 		if (x == universe->cols - 1) {
 			++y;
 			x = 0;

@@ -13,11 +13,7 @@ struct glwindow {
 
 struct gluniverse {
 	unsigned program;
-	unsigned* vbo;
-	unsigned* ebo;
 	unsigned* vao;
-	size_t numvbo;
-	size_t numebo;
 	size_t numvao;
 };
 
