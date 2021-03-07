@@ -57,7 +57,7 @@ genuniverse(int cols, int rows)
 		fprintf(stderr, "error: could not allocate memory\n");
 		exit(1);
 	}
-	for (i = 0; i < rows; ++i) {
+	for (i = 0; i < cols; ++i) {
 		universe->space[i] = calloc(rows, 1);
 		if (!universe->space[i]) {
 			fprintf(stderr, "error: could not allocate memory\n");
