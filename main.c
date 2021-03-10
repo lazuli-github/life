@@ -17,6 +17,7 @@ main(int argc, char **argv)
 	struct universe* universe;
 	struct universe* nextuniverse;
 	int quit = 0, lasttime = 0, mousex, mousey, clickedsqx, clickedsqy, paused = 0;
+	int fps = 10;
 
 	switch (argc) {
 	case 2:
@@ -58,14 +59,27 @@ main(int argc, char **argv)
 				universe->space[clickedsqx][clickedsqy] = (char) !universe->space[clickedsqx][clickedsqy];
 				break;
 			case SDL_KEYDOWN:
+				printf("%d\n", fps);
 				switch (event.key.keysym.sym) {
 				case SDLK_SPACE:
 					paused = !paused;
 					break;
+				case SDLK_UP:
+					if (fps < INT_MAX - 1) {
+						++fps;
+						paused = 0;
+					}
+					break;
+				case SDLK_DOWN:
+					if (fps - 1 > 0)
+						--fps;
+					if (fps - 1 == 0)
+						paused = 1;
+					break;
 				}
 			}
 		}
-		if (SDL_GetTicks() - lasttime >= 100) {
+		if (SDL_GetTicks() - lasttime >= 1000 / fps) {
 			drawgluniverse(graphics->glwindow, graphics->gluniverse, universe);
 			if (!paused) {
 				nextuniverse = nextgen(universe);
