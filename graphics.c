@@ -180,7 +180,7 @@ delgluniverse(struct gluniverse* gluniverse)
 /*
  * Transforms the window's x coordinates into OpenGL coordinates.
  */
-static inline float
+float
 normxcoord(struct glwindow* glwindow, float x)
 {
 	return ((float) -glwindow->width / 2.0f + x) / ((float) glwindow->width / 2);
@@ -192,7 +192,7 @@ normxcoord(struct glwindow* glwindow, float x)
  * so (0,0) is the top left corner, but in OpenGL the top starts at 1 and
  * decreases all the way down to -1.
  */
-static inline float
+float
 normycoord(struct glwindow* glwindow, float y)
 {
 	return ((float) glwindow->height / 2.0f - y) / ((float) glwindow->height / 2);
@@ -223,6 +223,8 @@ newgluniverse(struct glwindow* glwindow, struct universe* universe)
 	}
 	sqwidth = (float) glwindow->width / (float) universe->cols;
 	sqheight = (float) glwindow->height / (float) universe->rows;
+	gluniverse->sqwidth = sqwidth;
+	gluniverse->sqheight = sqheight;
 
 	glViewport(0, 0, glwindow->width, glwindow->height);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -295,6 +297,7 @@ initgphs(struct universe* universe)
 	}
 
 	initsdl();
+
 	glwindow = newglwindow(width, height);
 	gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress);
 	gluniverse = newgluniverse(glwindow, universe);

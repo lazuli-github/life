@@ -15,6 +15,8 @@ struct gluniverse {
 	unsigned program;
 	unsigned* vao;
 	size_t numvao;
+	float sqwidth;
+	float sqheight;
 };
 
 struct graphics {
@@ -22,6 +24,9 @@ struct graphics {
 	struct gluniverse* gluniverse;
 };
 
+
+float normxcoord(struct glwindow* glwindow, float x);
+float normycoord(struct glwindow* glwindow, float y);
 struct graphics* initgphs(struct universe* universe);
 struct glwindow* newglwindow(int width, int height);
 struct gluniverse* newgluniverse(struct glwindow* glwindow, struct universe* universe);

@@ -1,38 +1,77 @@
 #include <stdlib.h>
-#include <time.h>
+#include <math.h>
+#include <errno.h>
+#include <limits.h>
 
 #include "graphics.h"
 #include "universe.h"
 
 int
-main(void)
+main(int argc, char **argv)
 {
+	char *endptr;
 	SDL_Event event;
 	struct graphics* graphics;
-	const int cols = 50, rows = 49;
-	struct universe* universe = genuniverse(cols, rows);
+	int cols = 42, rows = 42;
+	long n = 0;
+	struct universe* universe;
 	struct universe* nextuniverse;
-	int quit = 0, lasttime = 0, currenttime = 0;
+	int quit = 0, lasttime = 0, mousex, mousey, clickedsqx, clickedsqy, paused = 0;
 
-	graphics = initgphs(universe);
-
-	srand(time(NULL));
-	for (int i = 0; i < cols; ++i) {
-		for (int j = 0; j < rows; j++)
-			universe->space[i][j] = rand() & 0xff % 2;
+	switch (argc) {
+	case 2:
+		n = strtol(argv[1], &endptr, 0);
+		if (errno == ERANGE || n > INT_MAX) {
+			fprintf(stderr, "error: number of columns is too large.\n");
+			return EXIT_FAILURE;
+		} else if (endptr == argv[1] || n < 1) {
+			fprintf(stderr, "error: invalid number of columns.\n");
+			return EXIT_FAILURE;
+		}
+		cols = (int) n;
+		rows = cols;
+		break;
+	case 1:
+		cols = 42;
+		rows = 42;
+		break;
+	default:
+		fprintf(stderr, "error: invalid arguments.\n");
+		return EXIT_FAILURE;
 	}
+
+	universe = genuniverse(cols, rows);
+	graphics = initgphs(universe);
 	lasttime = SDL_GetTicks();
 	while (!quit)
 	{
 		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT)
+			switch (event.type) {
+			case SDL_QUIT:
 				quit = 1;
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				SDL_GetMouseState(&mousex, &mousey);
+				/* Here I use double for extra precision in click. */
+				clickedsqx = (int) floor((double) mousex / (double) graphics->gluniverse->sqwidth);
+				clickedsqy = (int) floor((double) mousey / (double) graphics->gluniverse->sqheight);
+				universe->space[clickedsqx][clickedsqy] = 1;
+				break;
+			case SDL_KEYDOWN:
+				switch (event.key.keysym.sym) {
+				case SDLK_SPACE:
+					paused = !paused;
+					break;
+				}
+			}
 		}
 		if (SDL_GetTicks() - lasttime >= 100) {
 			drawgluniverse(graphics->glwindow, graphics->gluniverse, universe);
-			nextuniverse = nextgen(universe);
-			deluniverse(universe);
-			universe = nextuniverse;
+			if (!paused) {
+				nextuniverse = nextgen(universe);
+				deluniverse(universe);
+				universe = nextuniverse;
+			}
 			lasttime = SDL_GetTicks();
 		}
 	}
