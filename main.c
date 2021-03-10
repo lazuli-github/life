@@ -59,7 +59,6 @@ main(int argc, char **argv)
 				universe->space[clickedsqx][clickedsqy] = (char) !universe->space[clickedsqx][clickedsqy];
 				break;
 			case SDL_KEYDOWN:
-				printf("%d\n", fps);
 				switch (event.key.keysym.sym) {
 				case SDLK_SPACE:
 					paused = !paused;
