@@ -55,7 +55,7 @@ main(int argc, char **argv)
 				/* Here I use double for extra precision in click. */
 				clickedsqx = (int) floor((double) mousex / (double) graphics->gluniverse->sqwidth);
 				clickedsqy = (int) floor((double) mousey / (double) graphics->gluniverse->sqheight);
-				universe->space[clickedsqx][clickedsqy] = 1;
+				universe->space[clickedsqx][clickedsqy] = (char) !universe->space[clickedsqx][clickedsqy];
 				break;
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym) {
